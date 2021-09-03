@@ -147,4 +147,4 @@ if __name__ == '__main__':
 
         if (epoch%100 == 0) :
             torch.save({"model": model.state_dict(), "loss" : current_loss}, \
-                       f'./models/epoch_{epoch}_model_parameters.pth')
+                       f'../gMH/models/epoch_{epoch}_model_parameters.pth')
