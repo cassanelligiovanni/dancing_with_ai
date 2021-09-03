@@ -58,15 +58,15 @@ if __name__ == '__main__':
 
 
     model = Model(encoder, decoder,
-                  condition_step=10,
-                  sliding_windown_size=426,
+                  condition_step=30,
+                  sliding_windown_size=852,
                   lambda_v=0.01,
                   device=device)
 
 
     learningRate = 0.0001
-    maxEpochs = 2000
-    batch_size = 16
+    maxEpochs = 3500
+    batch_size = 32
 
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
             current_loss = current_loss + loss.item()
 
-        if epoch == 1000:
+        if epoch == 800:
             scheduler.step()
 
         if epoch == 2000:
