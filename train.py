@@ -39,7 +39,7 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-    encoder = Encoder(max_seq_len=2878,
+    encoder = Encoder(max_seq_len=426,
                       input_size=INPUT_SIZE,
                       d_word_vec=D_MODEL,
                       n_layers=N_LAYERS,
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     model = Model(encoder, decoder,
                   condition_step=30,
-                  sliding_windown_size=852,
+                  sliding_windown_size=426,
                   lambda_v=0.01,
                   device=device)
 
@@ -136,7 +136,7 @@ if __name__ == '__main__':
         if epoch == 800:
             scheduler.step()
 
-        if epoch == 2000:
+        if epoch == 1400:
             scheduler.step()
 
         epoch_str = "| {0:3.0f} ".format(epoch)[:5]
