@@ -29,8 +29,8 @@ if __name__ == '__main__':
 
     D_POSE_VEC = 51
 
-    D_MODEL = 200
-    N_LAYERS = 1
+    D_MODEL = 300
+    N_LAYERS = 2
     N_HEAD = 8
     D_K, D_V = 64, 64
     D_INNER = 1024
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
 
-    train_dir = "../data/dataset/train"
+    train_dir = "../gMH/train/"
 
     music_data, dance_data = load_data(train_dir)
     loader = prepare_dataloader(music_data, dance_data, batch_size)
