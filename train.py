@@ -64,9 +64,9 @@ if __name__ == '__main__':
                   device=device)
 
 
-    learningRate = 0.0001
+    learningRate = 0.01
     maxEpochs = 3500
-    batch_size = 32
+    batch_size = 8
 
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
@@ -85,10 +85,10 @@ if __name__ == '__main__':
     updates = 0
 
     # Set random seed
-    random.seed(100)
-    torch.manual_seed(200)
-    if torch.cuda.is_available() :
-        torch.cuda.manual_seed(200)
+    # random.seed(100)
+    # torch.manual_seed(200)
+    # if torch.cuda.is_available() :
+    #     torch.cuda.manual_seed(200)
 
     model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
 
