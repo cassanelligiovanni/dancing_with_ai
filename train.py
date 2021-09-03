@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
 
     model = Model(encoder, decoder,
-                  condition_step=30,
+                  condition_step=10,
                   sliding_windown_size=426,
                   lambda_v=0.01,
                   device=device)
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     learningRate = 0.0001
     maxEpochs = 3500
-    batch_size = 8
+    batch_size = 32
 
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())

@@ -44,7 +44,7 @@ def main(_):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    encoder = Encoder(max_seq_len=426,
+    encoder = Encoder(max_seq_len=2878,
                       input_size=INPUT_SIZE,
                       d_word_vec=D_MODEL,
                       n_layers=N_LAYERS,
@@ -123,7 +123,7 @@ def main(_):
        final[:,3*11:3*12] = root
        final = final.reshape(final.shape[0], 17, 3)
 
-       save_obj(final, "../gMH//predicted/",name )
+       save_obj(final, "../gMH/predicted/",name )
 
 if __name__ == '__main__':
   app.run(main)
