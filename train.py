@@ -71,7 +71,7 @@ if __name__ == '__main__':
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
 
-    train_dir = "../data/dataset/train"
+    train_dir = "../gMH/train"
 
     music_data, dance_data = load_data(train_dir)
     loader = prepare_dataloader(music_data, dance_data, batch_size)
