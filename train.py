@@ -85,10 +85,10 @@ if __name__ == '__main__':
     updates = 0
 
     # Set random seed
-    # random.seed(100)
-    # torch.manual_seed(200)
-    # if torch.cuda.is_available() :
-    #     torch.cuda.manual_seed(200)
+    random.seed(100)
+    torch.manual_seed(200)
+    if torch.cuda.is_available() :
+        torch.cuda.manual_seed(200)
 
     model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
 
@@ -133,10 +133,10 @@ if __name__ == '__main__':
 
             current_loss = current_loss + loss.item()
 
-        if epoch == 800:
+        if epoch == 100:
             scheduler.step()
 
-        if epoch == 1400:
+        if epoch == 200:
             scheduler.step()
 
         epoch_str = "| {0:3.0f} ".format(epoch)[:5]
