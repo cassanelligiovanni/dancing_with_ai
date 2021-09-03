@@ -64,7 +64,7 @@ if __name__ == '__main__':
                   device=device)
 
 
-    learningRate = 0.001
+    learningRate = 0.0001
     maxEpochs = 3500
     batch_size = 8
 
