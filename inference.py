@@ -36,8 +36,8 @@ def main(_):
 
     D_POSE_VEC = 51
 
-    D_MODEL = 200
-    N_LAYERS = 1
+    D_MODEL = 300
+    N_LAYERS = 2
     N_HEAD = 8
     D_K, D_V = 64, 64
     D_INNER = 1024
@@ -119,15 +119,14 @@ def main(_):
                  dec_output = model.linear(dec_output)
                  preds.append(dec_output)
 
-
           final = np.array([np.array(x) for x in  preds])
-          final = final.reshape(final.shape[0], 54)
-          root = final[:,51:]
-          final = final + np.tile(root,(1,18))
-          final[:,51:] = root
-          final = final.reshape(final.shape[0], 18, 3)
+          final = final.reshape(final.shape[0], 51)
+          root = final[:,3*11:3*12]
+          final = final + np.tile(root,(1,17))
+          final[:,3*11:3*12] = root
+          final = final.reshape(final.shape[0], 17, 3)
 
-          save_obj(final, "./data/dataset/predicted/",name )
+          save_obj(final, "../data/dataset/predicted/",name )
 
 if __name__ == '__main__':
   app.run(main)

@@ -1,5 +1,9 @@
 import os
 
+from absl import app
+from absl import flags
+
+import pickle
 import numpy as np
 
 import random
@@ -21,39 +25,48 @@ from dataset import *
 np.random.seed(0)
 torch.manual_seed(0)
 
+FLAGS = flags.FLAGS
+flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
+flags.DEFINE_string('audio_input_size',"439", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('motion_input_size',"51", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('d_model',"300", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('n_layers',"2", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('n_heads',"8", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('inner_d',"1024", "path to normalised 3d keypoints + extension")
+
+def main(_):
+
+    data_dir = FLAGS.data_dir
+
+    audio_input_size = int(FLAGS.audio_input_size)
+    motion_input_size = int(FLAGS.motion_input_size)
+    d_model = int(FLAGS.d_model)
+    n_layers = int(FLAGS.n_layers)
+    n_heads = int(FLAGS.n_heads)
+    inner_d = int(FLAGS.inner_d)
 
 
-if __name__ == '__main__':
-
-    INPUT_SIZE = 439
-
-    D_POSE_VEC = 51
-
-    D_MODEL = 300
-    N_LAYERS = 2
-    N_HEAD = 8
     D_K, D_V = 64, 64
-    D_INNER = 1024
     DROPOUT = 0.1
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
     encoder = Encoder(max_seq_len=2878,
-                      input_size=INPUT_SIZE,
-                      d_word_vec=D_MODEL,
-                      n_layers=N_LAYERS,
-                      n_head=N_HEAD,
+                      input_size=audio_input_size,
+                      d_word_vec=d_model,
+                      n_layers=n_layers,
+                      n_head=n_heads,
                       d_k=D_K,
                       d_v=D_V,
-                      d_model=D_MODEL,
-                      d_inner=D_INNER,
+                      d_model=d_model,
+                      d_inner=inner_d,
                       dropout=DROPOUT)
 
-    decoder = Decoder(input_size=D_POSE_VEC,
-                      d_word_vec=D_POSE_VEC,
-                      hidden_size=D_INNER,
-                      encoder_d_model=D_MODEL,
+    decoder = Decoder(input_size=motion_input_size,
+                      d_word_vec=motion_input_size,
+                      hidden_size=inner_d,
+                      encoder_d_model=d_model,
                       dropout=DROPOUT)
 
 
@@ -65,13 +78,13 @@ if __name__ == '__main__':
 
 
     learningRate = 0.0001
-    maxEpochs = 2000
+    maxEpochs = 10000
     batch_size = 16
 
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
 
-    train_dir = "../gMH/train/"
+    train_dir = data_dir + "dataset/train"
 
     music_data, dance_data = load_data(train_dir)
     loader = prepare_dataloader(music_data, dance_data, batch_size)
@@ -136,7 +149,7 @@ if __name__ == '__main__':
         if epoch == 1000:
             scheduler.step()
 
-        if epoch == 2000:
+        if epoch == 3000:
             scheduler.step()
 
         epoch_str = "| {0:3.0f} ".format(epoch)[:5]
@@ -145,6 +158,11 @@ if __name__ == '__main__':
         print(epoch_str, perc_str, error_str)
 
 
-        if (epoch%100 == 0) :
+        if (epoch%500 == 0) :
             torch.save({"model": model.state_dict(), "loss" : current_loss}, \
-                       f'./models/epoch_{epoch}_model_parameters.pth')
+                       f'{data_dir}models/epoch_{epoch}_model_parameters.pth')
+
+if __name__ == '__main__':
+
+    app.run(main)
+
