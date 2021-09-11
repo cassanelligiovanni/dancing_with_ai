@@ -78,7 +78,7 @@ def main(_):
 
 
     learningRate = 0.0001
-    maxEpochs = 10000
+    maxEpochs = 20000
     batch_size = 16
 
     for name, parameters in model.named_parameters():
@@ -118,10 +118,10 @@ def main(_):
         for i, batch in enumerate(loader):
 
             music_seed, pos, dance_seed = map(lambda x: x.to(device), batch)
-            target = dance_seed[:, 1:]
-            music_seed = music_seed[:, :-1]
-            pos = pos[:, :-1]
-            dance_seed = dance_seed[:, :-1]
+            target = dance_seed[:, 20:]
+            music_seed = music_seed[:, :-20]
+            pos = pos[:, :-20]
+            dance_seed = dance_seed[:, :-20]
 
             if torch.cuda.is_available() :
                 hidden, out_frame, out_seq = model.module.init_decoder_hidden(target.size(0))
@@ -146,10 +146,10 @@ def main(_):
 
             current_loss = current_loss + loss.item()
 
-        if epoch == 1000:
+        if epoch == 4000:
             scheduler.step()
 
-        if epoch == 3000:
+        if epoch == 8000:
             scheduler.step()
 
         epoch_str = "| {0:3.0f} ".format(epoch)[:5]
