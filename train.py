@@ -158,7 +158,7 @@ def main(_):
         print(epoch_str, perc_str, error_str)
 
 
-        if (epoch%500 == 0) :
+        if (epoch%100 == 0) :
             torch.save({"model": model.state_dict(), "loss" : current_loss}, \
                        f'{data_dir}models/epoch_{epoch}_model_parameters.pth')
 
