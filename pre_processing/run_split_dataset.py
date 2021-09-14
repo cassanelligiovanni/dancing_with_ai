@@ -9,6 +9,7 @@ from utils.utils import *
 FLAGS = flags.FLAGS
 flags.DEFINE_string('motion_dir',"./temp", "path to 3d keypoints + extension")
 flags.DEFINE_string('audio_dir',"./temp", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('out_dir',"./temp", "path to normalised 3d keypoints + extension")
 
 test_music = ["BR5", "HO5", "JB5", "JS5", "KR5", "LH5", "LO5", "MH5", "PO5", "WA5"]
 
@@ -62,14 +63,28 @@ def main(_):
     sys.stderr.write('\ndone.\n')
 
 
+def align(musics, dances):
+    assert len(musics) == len(dances), \
+        'the number of audios should be equal to that of videos'
+    new_musics=[]
+    new_dances=[]
 
+    new_musics.append([musics[j] for j in range(len(musics)) if j%3==0])
+    new_musics.append([musics[j] for j in range(len(musics)) if j%3==1])
+    new_musics.append([musics[j] for j in range(len(musics)) if j%3==2])
+
+    new_dances.append([dances[j] for j in range(len(musics)) if j%3==0])
+    new_dances.append([dances[j] for j in range(len(musics)) if j%3==1])
+    new_dances.append([dances[j] for j in range(len(musics)) if j%3==2])
+
+    return new_musics, new_dances
 
 
 
 def chuck_and_save(name, max_length, training):
 
-    audio = np.load("./data/audio_features/"+name, allow_pickle=True)
-    motion = np.load("./data/motions/"+name, allow_pickle=True )
+    audio = np.load(FLAGS.audio_dir+name, allow_pickle=True)
+    motion = np.load(FLAGS.motion_dir+name, allow_pickle=True )
 
     # [n_frames x 54(17*3)]
     motion = motion.reshape(motion.shape[0], (motion.shape[1]*motion.shape[2]))
@@ -94,18 +109,22 @@ def chuck_and_save(name, max_length, training):
         l_new_motion = motion[start:end].shape[0]
         new_motion[:l_new_motion, :] = motion[start:end, :]
 
-        sequence = {}
-        sequence["id"] = name.split(".")[0]+"_"+str(i)
-        sequence["music"] = new_audio.tolist()
-        sequence["motion"] = new_motion.tolist()
+        downsmpl_music, downsmpl_motion = align(new_audio.tolist(), new_motion.tolist())
 
-        # if(i==4):
-        #     import pdb; pdb.set_trace()
+        for f in range(3):
 
-        if (training):
-            save_json(sequence, "./data2/dataset/train/"+sequence['id']+".json")
-        else :
-            save_json(sequence, "./data2/dataset/test/"+sequence['id']+".json")
+            sequence = {}
+            sequence["id"] = name.split(".")[0]+"_"+str(i)+"_"+str(f)
+            sequence["music"] = downsmpl_music[f]
+            sequence["motion"] = downsmpl_motion[f]
+
+            # if(i==4):
+            #     import pdb; pdb.set_trace()
+
+            if (training):
+                save_json(sequence, FLAGS.out_dir+"train/"+sequence['id']+".json")
+            else :
+                save_json(sequence, FLAGS.out_dir+"test/"+sequence['id']+".json")
 
 if __name__ == '__main__':
     app.run(main)

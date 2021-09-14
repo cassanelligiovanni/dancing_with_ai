@@ -64,7 +64,7 @@ def main(_):
 
     model = Model(encoder, decoder,
                   condition_step=30,
-                  sliding_windown_size=426,
+                  sliding_windown_size=142,
                   lambda_v=0.01,
                   device=device)
 
@@ -96,7 +96,7 @@ def main(_):
           hidden, dec_output, out_seq = model.init_decoder_hidden(b)
           a, c = hidden
 
-          enc_mask = get_subsequent_mask(music_tensor, 426)
+          enc_mask = get_subsequent_mask(music_tensor, 142)
           enc_outputs, *_ = model.encoder(music_tensor, pos, enc_mask)
 
           preds = []
