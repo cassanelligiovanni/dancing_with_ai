@@ -71,7 +71,7 @@ def main(_):
 
 
     model = Model(encoder, decoder,
-                  condition_step=20,
+                  condition_step=15,
                   sliding_windown_size=142,
                   lambda_v=0.01,
                   device=device)
