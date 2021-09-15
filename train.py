@@ -118,10 +118,10 @@ def main(_):
         for i, batch in enumerate(loader):
 
             music_seed, pos, dance_seed = map(lambda x: x.to(device), batch)
-            target = dance_seed[:, 20:]
-            music_seed = music_seed[:, :-20]
-            pos = pos[:, :-20]
-            dance_seed = dance_seed[:, :-20]
+            target = dance_seed[:, 1:]
+            music_seed = music_seed[:, :-1]
+            pos = pos[:, :-1]
+            dance_seed = dance_seed[:, :-1]
 
             if torch.cuda.is_available() :
                 hidden, out_frame, out_seq = model.module.init_decoder_hidden(target.size(0))
