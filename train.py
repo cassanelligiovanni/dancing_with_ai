@@ -79,7 +79,7 @@ def main(_):
 
     learningRate = 0.0001
     maxEpochs = 20000
-    batch_size = 32
+    batch_size = 16
 
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
