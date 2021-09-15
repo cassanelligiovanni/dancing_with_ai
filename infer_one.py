@@ -15,6 +15,7 @@ from torch.nn.utils.rnn import pack_sequence
 from absl import app
 from absl import flags
 
+from interpolate_to_60fps import *
 from utils.utils import *
 from model import *
 from dataset import *
@@ -86,7 +87,7 @@ def main(_):
           # music= np.load(audio_dir+ "/" + audio_name+".pkl", allow_pickle=True)
           music_tensor = torch.FloatTensor(music[None, :, :])
 
-          pos =torch.LongTensor(np.arange(1, 427, 1))
+          pos =torch.LongTensor(np.arange(1, 143, 1))
 
           b, music_length, _ = music_tensor.size()
           # bsz, tgt_seq_len, dim = tgt_seq.size()
@@ -123,7 +124,9 @@ def main(_):
        final[:,3*11:3*12] = root
        final = final.reshape(final.shape[0], 17, 3)
 
-       save_obj(final, "../gMH/predicted/",name )
+       interpolated = np.array(interpolate(final))
+
+       save_obj(interpolated, "../gMH/predicted/",name )
 
 if __name__ == '__main__':
   app.run(main)

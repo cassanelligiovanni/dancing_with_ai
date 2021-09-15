@@ -52,7 +52,7 @@ def main(_):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-    encoder = Encoder(max_seq_len=2878,
+    encoder = Encoder(max_seq_len=142,
                       input_size=audio_input_size,
                       d_word_vec=d_model,
                       n_layers=n_layers,
@@ -71,7 +71,7 @@ def main(_):
 
 
     model = Model(encoder, decoder,
-                  condition_step=10,
+                  condition_step=20,
                   sliding_windown_size=142,
                   lambda_v=0.01,
                   device=device)
@@ -79,7 +79,7 @@ def main(_):
 
     learningRate = 0.0001
     maxEpochs = 20000
-    batch_size = 16
+    batch_size = 32
 
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
@@ -98,10 +98,10 @@ def main(_):
     updates = 0
 
     # Set random seed
-    random.seed(100)
-    torch.manual_seed(200)
-    if torch.cuda.is_available() :
-        torch.cuda.manual_seed(200)
+    # random.seed(100)
+    # torch.manual_seed(200)
+    # if torch.cuda.is_available() :
+    #     torch.cuda.manual_seed(200)
 
     model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
 
@@ -146,10 +146,10 @@ def main(_):
 
             current_loss = current_loss + loss.item()
 
-        if epoch == 4000:
+        if epoch == 500:
             scheduler.step()
 
-        if epoch == 8000:
+        if epoch == 1000:
             scheduler.step()
 
         epoch_str = "| {0:3.0f} ".format(epoch)[:5]
@@ -158,7 +158,7 @@ def main(_):
         print(epoch_str, perc_str, error_str)
 
 
-        if (epoch%100 == 0) :
+        if (epoch%500 == 0) :
             torch.save({"model": model.state_dict(), "loss" : current_loss}, \
                        f'{data_dir}models/epoch_{epoch}_model_parameters.pth')
 
