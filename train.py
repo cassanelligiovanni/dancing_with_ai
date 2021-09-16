@@ -118,10 +118,10 @@ def main(_):
         for i, batch in enumerate(loader):
 
             music_seed, pos, dance_seed = map(lambda x: x.to(device), batch)
-            target = dance_seed[:, 1:]
-            music_seed = music_seed[:, :-1]
-            pos = pos[:, :-1]
-            dance_seed = dance_seed[:, :-1]
+            target = dance_seed[:, 20:]
+            music_seed = music_seed[:, :-20]
+            pos = pos[:, :-20]
+            dance_seed = dance_seed[:, :-20]
 
             if torch.cuda.is_available() :
                 hidden, out_frame, out_seq = model.module.init_decoder_hidden(target.size(0))
@@ -159,7 +159,7 @@ def main(_):
 
 
         if (epoch%100 == 0) :
-            torch.save({"one_step_model": model.state_dict(), "loss" : current_loss}, \
+            torch.save({"twenty_step_model": model.state_dict(), "loss" : current_loss}, \
                        f'{data_dir}models/epoch_{epoch}_model_parameters.pth')
 
 if __name__ == '__main__':
