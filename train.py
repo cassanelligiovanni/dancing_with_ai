@@ -71,7 +71,7 @@ def main(_):
 
 
     model = Model(encoder, decoder,
-                  condition_step=15,
+                  condition_step=20,
                   sliding_windown_size=142,
                   lambda_v=0.01,
                   device=device)
@@ -146,10 +146,10 @@ def main(_):
 
             current_loss = current_loss + loss.item()
 
-        if epoch == 500:
+        if epoch == 1000:
             scheduler.step()
 
-        if epoch == 1000:
+        if epoch == 2000:
             scheduler.step()
 
         epoch_str = "| {0:3.0f} ".format(epoch)[:5]
@@ -158,8 +158,8 @@ def main(_):
         print(epoch_str, perc_str, error_str)
 
 
-        if (epoch%500 == 0) :
-            torch.save({"model": model.state_dict(), "loss" : current_loss}, \
+        if (epoch%100 == 0) :
+            torch.save({"one_step_model": model.state_dict(), "loss" : current_loss}, \
                        f'{data_dir}models/epoch_{epoch}_model_parameters.pth')
 
 if __name__ == '__main__':

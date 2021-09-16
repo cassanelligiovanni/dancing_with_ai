@@ -37,7 +37,7 @@ def main(_):
     D_POSE_VEC = 51
 
     D_MODEL = 300
-    N_LAYERS = 2
+    N_LAYERS = 1
     N_HEAD = 8
     D_K, D_V = 64, 64
     D_INNER = 1024
@@ -45,7 +45,7 @@ def main(_):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    encoder = Encoder(max_seq_len=2878,
+    encoder = Encoder(max_seq_len=142,
                       input_size=INPUT_SIZE,
                       d_word_vec=D_MODEL,
                       n_layers=N_LAYERS,
@@ -64,7 +64,7 @@ def main(_):
 
 
     model = Model(encoder, decoder,
-                  condition_step=30,
+                  condition_step=10,
                   sliding_windown_size=142,
                   lambda_v=0.01,
                   device=device)
