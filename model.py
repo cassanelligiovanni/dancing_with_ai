@@ -96,7 +96,6 @@ class Encoder(nn.Module):
             get_sinusoid_encoding_table(n_position, d_word_vec, padding_idx=0),
             freeze=True)
 
-        import pdb; pdb.set_trace()
         self.layer_stack = nn.ModuleList([
             EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
             for _ in range(n_layers)])
@@ -109,7 +108,6 @@ class Encoder(nn.Module):
         enc_output = self.src_emb(src_seq)
         enc_output += self.position_enc(src_pos)
 
-        import pdb; pdb.set_trace()
         for enc_layer in self.layer_stack:
             enc_output, enc_slf_attn = enc_layer(enc_output, slf_attn_mask=mask)
 
