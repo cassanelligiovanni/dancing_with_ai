@@ -20,8 +20,8 @@ from utils.utils import *
 from model import *
 from dataset import *
 
-np.random.seed(0)
-torch.manual_seed(0)
+# np.random.seed(0)
+# torch.manual_seed(0)
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("motion", "/temp-motion", "")
@@ -37,7 +37,7 @@ def main(_):
     D_POSE_VEC = 51
 
     D_MODEL = 300
-    N_LAYERS = 1
+    N_LAYERS = 2
     N_HEAD = 8
     D_K, D_V = 64, 64
     D_INNER = 1024
@@ -69,7 +69,7 @@ def main(_):
                   lambda_v=0.01,
                   device=device)
 
-    pretrained_dict = torch.load(model_parameters, map_location='cpu')['model']
+    pretrained_dict = torch.load(model_parameters, map_location='cpu')['twenty_step_model']
     pretrained_dict = {key.replace("module.", ""): value for key, value in pretrained_dict.items()}
 
     model.load_state_dict(pretrained_dict)
