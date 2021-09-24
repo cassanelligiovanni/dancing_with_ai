@@ -26,7 +26,7 @@ class Encoder(nn.Module):
     def __init__(
             self, max_seq_len=142, music_size=439,
             n_layers=2, n_head=8, d_k=64, d_v=64,
-            d_model=300, d_inner=1024, dropout=0.1):
+          d_model=240, d_inner=1024, dropout=0.1):
 
         super().__init__()
 
@@ -39,17 +39,16 @@ class Encoder(nn.Module):
             positional_encoding_M(n_position, d_model, padding_idx=0),
             freeze=True)
 
-        self.layer_stack = nn.ModuleList([
-            EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
-            for _ in range(n_layers)])
+        self.transformerLayer = nn.TransformerEncoderLayer(d_model=d_model, nhead=n_head, dim_feedforward=d_inner, batch_first=True)
+        self.transformer = nn.TransformerEncoder(self.transformerLayer, num_layers=2)
+
 
     def forward(self, src_seq, src_pos):
 
         enc_output = self.src_emb(src_seq)
         enc_output += self.position_enc(src_pos)
 
-        for enc_layer in self.layer_stack:
-            enc_output = enc_layer(enc_output)
+        enc_output = self.transformer(enc_output)
 
         return enc_output,
 

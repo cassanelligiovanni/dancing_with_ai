@@ -24,7 +24,7 @@ from dataset import *
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
-flags.DEFINE_string('d_model',"300", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('d_model',"240", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('n_layers',"2", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('n_heads',"8", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('inner_d',"1024", "path to normalised 3d keypoints + extension")

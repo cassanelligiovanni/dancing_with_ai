@@ -36,7 +36,7 @@ def main(_):
 
     D_POSE_VEC = 51
 
-    D_MODEL = 300
+    D_MODEL = 240
     N_LAYERS = 2
     N_HEAD = 8
     D_K, D_V = 64, 64
