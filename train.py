@@ -22,39 +22,46 @@ from utils.utils import *
 from model import *
 from dataset import *
 
-np.random.seed(0)
-torch.manual_seed(0)
-
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
-flags.DEFINE_string('audio_input_size',"439", "path to normalised 3d keypoints + extension")
-flags.DEFINE_string('motion_input_size',"51", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('d_model',"300", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('n_layers',"2", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('n_heads',"8", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('inner_d',"1024", "path to normalised 3d keypoints + extension")
 
+# Set random seed
+seed = 42
+os.environ['PYTHONHASHSEED'] = str(seed)
+torch.manual_seed(seed)
+torch.cuda.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+np.random.seed(seed)
+random.seed(seed)
+
 def main(_):
 
     data_dir = FLAGS.data_dir
+    train_dir = data_dir + "dataset/train"
 
-    audio_input_size = int(FLAGS.audio_input_size)
-    motion_input_size = int(FLAGS.motion_input_size)
+    # Model Parameters
     d_model = int(FLAGS.d_model)
     n_layers = int(FLAGS.n_layers)
     n_heads = int(FLAGS.n_heads)
     inner_d = int(FLAGS.inner_d)
-
-
+    MUSIC_SIZE = 439
+    DANCE_SIZE = 51
     D_K, D_V = 64, 64
+
+    # Training  Hyper-parameters
+    learningRate = 0.0001
+    maxEpochs = 20000
+    batch_size = 16
     DROPOUT = 0.1
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
     encoder = Encoder(max_seq_len=142,
-                      input_size=audio_input_size,
-                      d_word_vec=d_model,
+                      music_size=MUSIC_SIZE,
                       n_layers=n_layers,
                       n_head=n_heads,
                       d_k=D_K,
@@ -63,28 +70,20 @@ def main(_):
                       d_inner=inner_d,
                       dropout=DROPOUT)
 
-    decoder = Decoder(input_size=motion_input_size,
-                      d_word_vec=motion_input_size,
+    decoder = Decoder(motion_size=DANCE_SIZE,
+                      d_emb=DANCE_SIZE,
                       hidden_size=inner_d,
-                      encoder_d_model=d_model,
                       dropout=DROPOUT)
 
 
     model = Model(encoder, decoder,
                   condition_step=10,
-                  sliding_windown_size=142,
                   lambda_v=0.01,
                   device=device)
-
-
-    learningRate = 0.0001
-    maxEpochs = 20000
-    batch_size = 16
 
     for name, parameters in model.named_parameters():
         print(name, ':', parameters.size())
 
-    train_dir = data_dir + "dataset/train"
 
     music_data, dance_data = load_data(train_dir)
     loader = prepare_dataloader(music_data, dance_data, batch_size)
@@ -97,18 +96,12 @@ def main(_):
     criterion = nn.L1Loss()
     updates = 0
 
-    # Set random seed
-    # random.seed(100)
-    # torch.manual_seed(200)
-    # if torch.cuda.is_available() :
-    #     torch.cuda.manual_seed(200)
-
     model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
 
     print(" ______________ ______")
     print("|     Epoch    | RMSE |")
     print("|------------  |------|")
-    for epoch in range(maxEpochs):
+    for epoch in range(1, maxEpochs+1):
 
         calculate_loss = False
         current_loss = 0
@@ -117,39 +110,38 @@ def main(_):
 
         for i, batch in enumerate(loader):
 
-            music_seed, pos, dance_seed = map(lambda x: x.to(device), batch)
-            target = dance_seed[:, 1:]
-            music_seed = music_seed[:, :-1]
+            music, pos, dance = map(lambda x: x.to(device), batch)
+            target = dance[:, 1:]
+            music = music[:, :-1]
             pos = pos[:, :-1]
-            dance_seed = dance_seed[:, :-1]
+            dance = dance[:, :-1]
 
+            #Initialise
             if torch.cuda.is_available() :
-                hidden, out_frame, out_seq = model.module.init_decoder_hidden(target.size(0))
+                hidden, initial_frame, initial_seq = model.module.initialise_decoder(target.size(0))
             else :
-                hidden, out_frame, out_seq = model.init_decoder_hidden(target.size(0))
+                hidden, initial_frame, initial_seq = model.initialise_decoder(target.size(0))
 
 
-            # forward
             optimizer.zero_grad()
 
-            # output = model(music_seed, pos, dance_seed, i)
-            output = model(music_seed, pos, dance_seed, hidden, out_frame, out_seq, epoch)
+            # Forward
+            output = model(music, pos, dance, hidden, initial_frame, initial_seq, epoch)
 
-
-            # backward
+            # Backpropagation
             loss = criterion(output, target)
-
             loss.backward()
 
-            # update parameters
+            # Update parameters
             optimizer.step()
 
+        # Track loss
             current_loss = current_loss + loss.item()
 
-        if epoch == 1500:
+        if epoch == 1000:
             scheduler.step()
 
-        if epoch == 3000:
+        if epoch == 2000:
             scheduler.step()
 
         epoch_str = "| {0:3.0f} ".format(epoch)[:5]
@@ -157,10 +149,10 @@ def main(_):
         error_str = "%) |{0:5.2f}".format(current_loss)[:10] + "|"
         print(epoch_str, perc_str, error_str)
 
-
+       # Save checkpoints
         if (epoch%500 == 0) :
             torch.save({"model": model.state_dict(), "loss" : current_loss}, \
-                       f'{data_dir}models/one_step_epoch_{epoch}_model_parameters.pth')
+                       f'{data_dir}models/final_{epoch}_model_parameters.pth')
 
 if __name__ == '__main__':
 

@@ -41,7 +41,6 @@ def main(_):
 
         this_music = np.load(this_music_path, allow_pickle=True)
         print(this_music.shape)
-        import pdb; pdb.set_trace()
 
         this_audio_name = this_name + ".pkl"
 

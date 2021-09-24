@@ -11,6 +11,9 @@ flags.DEFINE_string('motion_dir',"./temp", "path to 3d keypoints + extension")
 flags.DEFINE_string('audio_dir',"./temp", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('out_dir',"./temp", "path to normalised 3d keypoints + extension")
 
+train_music = ["BR0", "BR1", "BR2", "BR3", "BR4", "HO0", "HO1", "HO2", "HO3", "HO4", "MH0", "MH1", "MH2", "MH3", "MH4",
+               "KR0", "KR1", "KR2", "KR3", "KR4","LH0", "LH1", "LH2", "LH3", "LH4","LO0", "LO1", "LO2", "LO3", "LO4","PO0", "PO1", "PO2", "PO3", "PO4","WA0", "WA1", "WA2", "WA3", "WA4"]
+
 test_music = ["BR5", "HO5", "JB5", "JS5", "KR5", "LH5", "LO5", "MH5", "PO5", "WA5"]
 
 def main(_):
@@ -28,21 +31,36 @@ def main(_):
     # Find minium length of sequence
     min_length = 10e9
     lengths = []
-    for path in motion_paths:
-        plk = np.load(path, allow_pickle = True)
-        lengths.append(plk.shape[0])
-        if plk.shape[0]<min_length :
-            min_length = plk.shape[0]
-
 
     for audio_path in audio_paths:
         plk = np.load(audio_path, allow_pickle = True)
         if plk.shape[0]<min_length :
-
             min_length = plk.shape[0]
 
+    # Find minimum length
+    for test_audio_name in test_music:
 
+        test_motion_names = []
+        for motion in motion_names:
+            if ("m"+test_audio_name) in motion:
+                test_motion_names.append(motion)
 
+        plk = np.load(os.path.join(motion_dir, test_motion_names[0]), allow_pickle = True)
+        if plk.shape[0]<min_length :
+            min_length = plk.shape[0]
+
+    for train_audio_name in train_music:
+
+        train_motion_names = []
+        for motion in motion_names:
+            if ("m"+train_audio_name) in motion:
+                train_motion_names.append(motion)
+
+        plk = np.load(os.path.join(motion_dir, train_motion_names[0]), allow_pickle = True)
+        if plk.shape[0]<min_length :
+            min_length = plk.shape[0]
+
+    # Chunk and save
     for test_audio_name in test_music:
 
         test_motion_names = []
@@ -53,14 +71,19 @@ def main(_):
         chuck_and_save(test_motion_names[0], min_length, training=False )
 
 
-    for i, name in enumerate(audio_names):
+    for train_audio_name in train_music:
 
-        if not any(x in name for x in test_music):
-            chuck_and_save(name, min_length, True)
+        train_motion_names = []
+        for motion in motion_names:
+            if ("m"+train_audio_name) in motion:
+                train_motion_names.append(motion)
 
-        sys.stderr.write('\rextracting %d / %d' % (i + 1, len(audio_names)))
+        chuck_and_save(train_motion_names[0], min_length, training=True )
 
-    sys.stderr.write('\ndone.\n')
+
+    # sys.stderr.write('\rextracting %d / %d' % (i + 1, len(audio_names)))
+
+    # sys.stderr.write('\ndone.\n')
 
 
 def align(musics, dances):

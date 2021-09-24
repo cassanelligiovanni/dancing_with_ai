@@ -65,7 +65,6 @@ def main(_):
 
     model = Model(encoder, decoder,
                   condition_step=10,
-                  sliding_windown_size=426,
                   lambda_v=0.01,
                   device=device)
 

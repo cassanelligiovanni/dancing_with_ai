@@ -65,11 +65,11 @@ def main(_):
 
     model = Model(encoder, decoder,
                   condition_step=10,
-                  sliding_windown_size=142,
                   lambda_v=0.01,
                   device=device)
 
-    pretrained_dict = torch.load(model_parameters, map_location='cpu')['twenty_step_model']
+    pretrained_dict = torch.load(model_parameters, map_location='cpu')['model']
+    # pretrained_dict = torch.load(model_parameters, map_location='cpu')['twenty_step_model']
     pretrained_dict = {key.replace("module.", ""): value for key, value in pretrained_dict.items()}
 
     model.load_state_dict(pretrained_dict)

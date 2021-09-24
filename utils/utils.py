@@ -9,56 +9,48 @@ import pickle
 import json
 
 def save_json(file, path) :
-
     with open(path, 'w') as f:
-
         json.dump(file, f)
 
-
-
-
-
 def loss_function(input,target):
-
     criterion = nn.MSELoss()
     loss = criterion(input, target)
-
     return loss
-
-
-def convert_back_to_3d(batch, max_val, mean_pose) :
-
-    max_val_torch = torch.from_numpy(max_val)
-    mean_pose_torch = torch.from_numpy(mean_pose)
-
-    # print("####### batch size ######", batch.shape)
-
-    # print("####### max_val_torch size ######", max_val_torch.shape)
-
-    reconstructed = torch.mul(batch, max_val_torch)  + 1e-15
-
-    # print("####### pre-mean ######", reconstructed[0, 0])
-    reconstructed = reconstructed + mean_pose_torch
-    # print("####### mean ######", mean_pose_torch[0])
-
-    # print("####### port-mean ######", reconstructed[0, 0])
-    return reconstructed
-
-def add_noise(batch, sigma=0, variance=0.05):
-
-    eps = 1e-15
-
-    mean = torch.zeros_like(batch)
-    stddev = np.multiply(sigma, variance)+eps
-
-    noise = torch.normal(mean, stddev)
-    # print("#### NOISE SHAPE ###", noise.shape)
-    batch = batch  + noise
-    return batch
-
 
 def save_obj(obj, directory, name ):
     with open(directory + name +  '.pkl', 'wb') as f:
         pickle.dump(obj, f, 4)
+
+def generate_positions(insts):
+    src_seq, tgt_seq = list(zip(*insts))
+    src_pos = np.array([
+        [pos_i + 1 for pos_i, v_i in enumerate(inst)] for inst in src_seq])
+
+    src_seq = torch.FloatTensor(src_seq)
+    src_pos = torch.LongTensor(src_pos)
+    tgt_seq = torch.FloatTensor(tgt_seq)
+
+    return src_seq, src_pos, tgt_seq
+
+
+def positional_encoding_M(n_position, d_hid, padding_idx=None):
+    """ Sinusoid position encoding table """
+    def cal_angle(position, hid_idx):
+        return position / np.power(10000, 2 * (hid_idx // 2) / d_hid)
+
+    def get_posi_angle_vec(position):
+        return [cal_angle(position, hid_j) for hid_j in range(d_hid)]
+
+    sinusoid_table = np.array([get_posi_angle_vec(pos_i) for pos_i in range(n_position)])
+
+    sinusoid_table[:, 0::2] = np.sin(sinusoid_table[:, 0::2])  # dim 2i
+    sinusoid_table[:, 1::2] = np.cos(sinusoid_table[:, 1::2])  # dim 2i+1
+
+    if padding_idx is not None:
+        # zero vector for padding dimension
+        sinusoid_table[padding_idx] = 0.
+
+    return torch.FloatTensor(sinusoid_table)
+
 
 
