@@ -71,6 +71,12 @@ def load_data(data_dir, interval):
                 label = 6
             elif "WA" in fname:
                 label = 7
+            elif "JB" in fname:
+                label = 8
+            elif "JS" in fname:
+                label = 9
+
+
 
 
             with open(path) as f:
