@@ -78,8 +78,10 @@ def main(_):
             if ("m"+train_audio_name) in motion:
                 train_motion_names.append(motion)
 
-        chuck_and_save(train_motion_names[0], min_length, training=True )
+        for train_motion_name in train_motion_names:
+            chuck_and_save(train_motion_name, min_length, training=True )
 
+        # chuck_and_save(train_motion_names[0], min_length, training=True )
 
     # sys.stderr.write('\rextracting %d / %d' % (i + 1, len(audio_names)))
 

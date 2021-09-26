@@ -4,7 +4,7 @@
 
 """ This script handling the training process. """
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 import random
 import argparse
 import json
@@ -113,7 +113,7 @@ def main():
     train_data, train_labels = zip(*z)
 
 
-    train_loader = prepare_dataloader(train_data, train_labels, 32)
+    train_loader = prepare_dataloader(train_data, train_labels, 16)
 
     # TEST data
     test_data, test_labels = load_data(args.valid_dir, args.interval)
@@ -121,7 +121,7 @@ def main():
     random.shuffle(z)
     test_data, test_labels = zip(*z)
 
-    dev_loader = prepare_dataloader(test_data, test_labels, 32)
+    dev_loader = prepare_dataloader(test_data, test_labels, 16)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
