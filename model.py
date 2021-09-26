@@ -22,7 +22,7 @@ class Model(nn.Module):
     def initialise_decoder(self, batch_size):
         return self.decoder.initialise(batch_size, self.device)
 
-    def forward(self, src_seq, src_pos, tgt_seq, hidden, dec_output, out_seq, epoch_i):
+    def forward(self, src_seq, src_pos, tgt_seq, hidden, dec_output, out_seq, epoch_i=None):
         batch_size, seq_len, _ = tgt_seq.size()
         vec_h, vec_c = hidden
 

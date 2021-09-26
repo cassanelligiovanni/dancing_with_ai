@@ -5,8 +5,13 @@ import numpy as np
 from absl import app
 from absl import flags
 import pickle
-
+import wandb
 import json
+
+def train_log(loss, example_ct, epoch):
+    loss = float(loss)
+    wandb.log({"epoch": epoch, "loss": loss}, step=example_ct)
+
 
 def save_json(file, path) :
     with open(path, 'w') as f:

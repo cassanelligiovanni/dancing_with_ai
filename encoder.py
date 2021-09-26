@@ -40,7 +40,7 @@ class Encoder(nn.Module):
             freeze=True)
 
         self.transformerLayer = nn.TransformerEncoderLayer(d_model=d_model, nhead=n_head, dim_feedforward=d_inner, batch_first=True)
-        self.transformer = nn.TransformerEncoder(self.transformerLayer, num_layers=2)
+        self.transformer = nn.TransformerEncoder(self.transformerLayer, num_layers=n_layers)
 
 
     def forward(self, src_seq, src_pos):

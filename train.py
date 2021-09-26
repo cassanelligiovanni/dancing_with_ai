@@ -22,6 +22,8 @@ from utils.utils import *
 from model import *
 from dataset import *
 
+import wandb
+
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
 flags.DEFINE_string('d_model',"240", "path to normalised 3d keypoints + extension")
@@ -38,66 +40,12 @@ torch.cuda.manual_seed_all(seed)
 np.random.seed(seed)
 random.seed(seed)
 
-def main(_):
-
-    data_dir = FLAGS.data_dir
-    train_dir = data_dir + "dataset/train"
-
-    # Model Parameters
-    d_model = int(FLAGS.d_model)
-    n_layers = int(FLAGS.n_layers)
-    n_heads = int(FLAGS.n_heads)
-    inner_d = int(FLAGS.inner_d)
-    MUSIC_SIZE = 439
-    DANCE_SIZE = 51
-    D_K, D_V = 64, 64
-
-    # Training  Hyper-parameters
-    learningRate = 0.0001
-    maxEpochs = 20000
-    batch_size = 16
-    DROPOUT = 0.1
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    encoder = Encoder(max_seq_len=142,
-                      music_size=MUSIC_SIZE,
-                      n_layers=n_layers,
-                      n_head=n_heads,
-                      d_k=D_K,
-                      d_v=D_V,
-                      d_model=d_model,
-                      d_inner=inner_d,
-                      dropout=DROPOUT)
-
-    decoder = Decoder(motion_size=DANCE_SIZE,
-                      d_emb=DANCE_SIZE,
-                      hidden_size=inner_d,
-                      dropout=DROPOUT)
+WANDB_API_KEY ="f29aca38281e9a7657e6661c5684aa35fecf37ce"
 
 
-    model = Model(encoder, decoder,
-                  condition_step=10,
-                  lambda_v=0.01,
-                  device=device)
+def train(maxEpochs, loader, optimizer, criterion, device, encoder, decoder, model):
 
-    for name, parameters in model.named_parameters():
-        print(name, ':', parameters.size())
-
-
-    music_data, dance_data = load_data(train_dir)
-    loader = prepare_dataloader(music_data, dance_data, batch_size)
-
-    optimizer = optim.Adam(filter(
-        lambda x: x.requires_grad, model.parameters()), lr=learningRate)
-
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
-
-    criterion = nn.L1Loss()
-    updates = 0
-
-    model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
-
+    steps = 0
     print(" ______________ ______")
     print("|     Epoch    | RMSE |")
     print("|------------  |------|")
@@ -110,6 +58,8 @@ def main(_):
 
         for i, batch in enumerate(loader):
 
+            steps += len(batch[0])
+
             music, pos, dance = map(lambda x: x.to(device), batch)
             target = dance[:, 1:]
             music = music[:, :-1]
@@ -121,7 +71,6 @@ def main(_):
                 hidden, initial_frame, initial_seq = model.module.initialise_decoder(target.size(0))
             else :
                 hidden, initial_frame, initial_seq = model.initialise_decoder(target.size(0))
-
 
             optimizer.zero_grad()
 
@@ -144,15 +93,82 @@ def main(_):
         if epoch == 2000:
             scheduler.step()
 
-        epoch_str = "| {0:3.0f} ".format(epoch)[:5]
-        perc_str = "({0:3.2f}".format(epoch*100.0 / maxEpochs)[:5]
-        error_str = "%) |{0:5.2f}".format(current_loss)[:10] + "|"
-        print(epoch_str, perc_str, error_str)
 
-       # Save checkpoints
+        train_log(current_loss, steps, epoch)
+
         if (epoch%500 == 0) :
             torch.save({"model": model.state_dict(), "loss" : current_loss}, \
                        f'{data_dir}models/final_{epoch}_model_parameters.pth')
+
+            test_log(model, data_dir)
+    # torch.onnx.export(model, (music, pos, dance, hidden, initial_frame, initial_seq, epoch),  "model.onnx" )
+    # wandb.save('model.onnx')
+
+
+def main(_):
+
+    wandb.init(entity="cassanelligiovanni", project="dissertation")
+    config = wandb.config
+
+    config.data_dir = FLAGS.data_dir
+    train_dir = config.data_dir + "dataset/train"
+
+    # Model Parameters
+    config.d_model = int(FLAGS.d_model)
+    config.n_layers = int(FLAGS.n_layers)
+    config.n_heads = int(FLAGS.n_heads)
+    config.inner_d = int(FLAGS.inner_d)
+    config.MUSIC_SIZE = 439
+    config.DANCE_SIZE = 51
+    config.D_K, config.D_V = 64, 64
+
+    # Training  Hyper-parameters
+    config.learningRate = 0.0001
+    config.lambda_v = 0.01
+    config.maxEpochs = 1
+    config.batch_size = 16
+    config.DROPOUT = 0.1
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    encoder = Encoder(max_seq_len=142,
+                      music_size=config.MUSIC_SIZE,
+                      n_layers=config.n_layers,
+                      n_head=config.n_heads,
+                      d_k=config.D_K,
+                      d_v=config.D_V,
+                      d_model=config.d_model,
+                      d_inner=config.inner_d,
+                      dropout=config.DROPOUT)
+
+    decoder = Decoder(motion_size=config.DANCE_SIZE,
+                      d_emb=config.DANCE_SIZE,
+                      hidden_size=config.inner_d,
+                      dropout=config.DROPOUT)
+
+
+    model = Model(encoder, decoder,
+                  condition_step=10,
+                  lambda_v=config.lambda_v,
+                  device=device)
+
+    wandb.watch(model, log="all")
+
+    music_data, dance_data = load_data(train_dir)
+    loader = prepare_dataloader(music_data, dance_data, config.batch_size)
+
+    optimizer = optim.Adam(filter(
+        lambda x: x.requires_grad, model.parameters()), lr=config.learningRate)
+
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
+
+    criterion = nn.L1Loss()
+    updates = 0
+
+    model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
+
+    train(config.maxEpochs, loader, optimizer, criterion,  device, encoder, decoder, model)
+
 
 if __name__ == '__main__':
 
