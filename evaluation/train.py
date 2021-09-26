@@ -87,7 +87,6 @@ def train(train_data, dev_data, classifier, device, args):
             if steps % args.log_interval == 0:
                 corrects = (torch.max(logits, 1)[1].view(label.size()).data == label.data).sum()
                 train_acc = 100.0 * corrects / batch[0].shape[0]
-                time.sleep(3)
                 print('\rBatch[{}] - loss: {:.6f}  acc: {:.4f}%({}/{})'.format(steps,
                                                                                loss.item(),
                                                                                train_acc,
