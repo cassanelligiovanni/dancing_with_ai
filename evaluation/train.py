@@ -152,11 +152,11 @@ def load_data(data_dir, interval):
 def prepare_dataloader(dance_data, labels, args):
     data_loader = torch.utils.data.DataLoader(
         DanceDataset(dance_data, labels),
-        num_workers=8,
+        num_workers=0,
         batch_size=args.batch_size,
         shuffle=True,
         # collate_fn=paired_collate_fn,
-        pin_memory=True
+        # pin_memory=True
     )
 
     return data_loader
