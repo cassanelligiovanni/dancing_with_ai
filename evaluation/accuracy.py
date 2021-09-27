@@ -55,7 +55,8 @@ def get_accuracy(dance, name):
 
     dance = np.array([np.array(x) for x in dance])
 
-    label = torch.LongTensor([extract_label(name)])
+    label = torch.cuda.LongTensor([extract_label(name)])if torch.cuda.is_available() else torch.LongTensor([extract_label(name)])
+
     dance = torch.cuda.FloatTensor(dance) if torch.cuda.is_available() else torch.FloatTensor(dance)
 
     logits, _ = classifier(dance.unsqueeze(0))
