@@ -21,8 +21,11 @@ from torch.nn.utils.rnn import pack_sequence
 from utils.utils import *
 from model import *
 from dataset import *
-
+from evaluation.evaluate import *
 import wandb
+
+sys.path.insert(0, './evaluation')
+
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
@@ -30,6 +33,11 @@ flags.DEFINE_string('d_model',"240", "path to normalised 3d keypoints + extensio
 flags.DEFINE_string('n_layers',"2", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('n_heads',"8", "path to normalised 3d keypoints + extension")
 flags.DEFINE_string('inner_d',"1024", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('learning_rate',"0.0001", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('lambda_v',"0.01", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('dropout',"0.1", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('max_epochs',"5000", "path to normalised 3d keypoints + extension")
+
 
 # Set random seed
 seed = 42
@@ -43,20 +51,19 @@ random.seed(seed)
 WANDB_API_KEY ="f29aca38281e9a7657e6661c5684aa35fecf37ce"
 
 
-def train(maxEpochs, loader, optimizer, criterion, device, encoder, decoder, model):
+def train(maxEpochs, train_loader,  optimizer, criterion, device, encoder, decoder, model, data_dir):
 
     steps = 0
-    print(" ______________ ______")
-    print("|     Epoch    | RMSE |")
-    print("|------------  |------|")
     for epoch in range(1, maxEpochs+1):
+
+        sys.stderr.write('\rEpoch : %d / %d' % (epoch , maxEpochs))
 
         calculate_loss = False
         current_loss = 0
 
         model.train()
 
-        for i, batch in enumerate(loader):
+        for i, batch in enumerate(train_loader):
 
             steps += len(batch[0])
 
@@ -84,7 +91,7 @@ def train(maxEpochs, loader, optimizer, criterion, device, encoder, decoder, mod
             # Update parameters
             optimizer.step()
 
-        # Track loss
+            # Track loss
             current_loss = current_loss + loss.item()
 
         if epoch == 1000:
@@ -96,11 +103,12 @@ def train(maxEpochs, loader, optimizer, criterion, device, encoder, decoder, mod
 
         train_log(current_loss, steps, epoch)
 
-        if (epoch%500 == 0) :
-            torch.save({"model": model.state_dict(), "loss" : current_loss}, \
-                       f'{data_dir}models/final_{epoch}_model_parameters.pth')
+        if(epoch%500 == 0) :
+            torch.save(model.state_dict(), "model.h5")
+            wandb.save('model.h5')
 
-            test_log(model, data_dir)
+        if ((epoch+1)%10 == 0):
+            test_log(model, data_dir, device)
     # torch.onnx.export(model, (music, pos, dance, hidden, initial_frame, initial_seq, epoch),  "model.onnx" )
     # wandb.save('model.onnx')
 
@@ -112,6 +120,7 @@ def main(_):
 
     config.data_dir = FLAGS.data_dir
     train_dir = config.data_dir + "dataset/train"
+    test_dir = config.data_dir + "dataset/test"
 
     # Model Parameters
     config.d_model = int(FLAGS.d_model)
@@ -123,11 +132,11 @@ def main(_):
     config.D_K, config.D_V = 64, 64
 
     # Training  Hyper-parameters
-    config.learningRate = 0.0001
-    config.lambda_v = 0.01
-    config.maxEpochs = 1
+    config.learningRate = float(FLAGS.learning_rate)
+    config.lambda_v = float(FLAGS.lambda_v)
+    config.maxEpochs = int(FLAGS.max_epochs)
     config.batch_size = 16
-    config.DROPOUT = 0.1
+    config.DROPOUT = float(FLAGS.dropout)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -154,11 +163,10 @@ def main(_):
 
     wandb.watch(model, log="all")
 
-    music_data, dance_data = load_data(train_dir)
-    loader = prepare_dataloader(music_data, dance_data, config.batch_size)
-
-    optimizer = optim.Adam(filter(
-        lambda x: x.requires_grad, model.parameters()), lr=config.learningRate)
+    music_train_data, dance_train_data = load_data(train_dir)
+    train_loader = prepare_dataloader(music_train_data, dance_train_data, config.batch_size)
+    print("\n")
+    optimizer = optim.Adam(filter(lambda x: x.requires_grad, model.parameters()), lr=config.learningRate)
 
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.1)
 
@@ -167,7 +175,7 @@ def main(_):
 
     model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
 
-    train(config.maxEpochs, loader, optimizer, criterion,  device, encoder, decoder, model)
+    train(config.maxEpochs, train_loader, optimizer, criterion,  device, encoder, decoder, model, config.data_dir)
 
 
 if __name__ == '__main__':

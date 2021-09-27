@@ -58,4 +58,12 @@ def positional_encoding_M(n_position, d_hid, padding_idx=None):
     return torch.FloatTensor(sinusoid_table)
 
 
-
+def get_subsequent_mask(seq, sliding_windown_size):
+    """ For masking out the subsequent info. """
+    batch_size, seq_len, _ = seq.size()
+    mask = torch.ones((seq_len, seq_len), device=seq.device, dtype=torch.uint8)
+    mask = torch.triu(mask, diagonal=-sliding_windown_size)
+    mask = torch.tril(mask, diagonal=sliding_windown_size)
+    mask = 1 - mask
+    # print(mask)
+    return mask.bool()

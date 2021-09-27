@@ -1,19 +1,23 @@
 import os
 import sys
 import numpy as np
+import torch
 from absl import app
 from absl import flags
 import pickle
 import json
+
+import torch.nn.functional as F
+
+import evaluation.classifier as classifier
 from evaluation.classifier import Classifier
-from evaluation.dataset import *
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
+# flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
 flags.DEFINE_string('motion_path',"./temp", "path to normalised 3d keypoints + extension")
 
 
-def get_label(name):
+def extract_label(name):
 
     label = -1
 
@@ -38,6 +42,7 @@ def get_label(name):
     elif "JS" in name:
         label = 9
 
+    return label
 
 
 
@@ -45,21 +50,21 @@ def get_accuracy(dance, name):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    classifier = torch.load("./classifier_model", map_location=torch.device('cpu'))
-
+    classifier = torch.load("./evaluation/checkpoints/final", map_location=torch.device('cpu'))
     classifier.eval()
 
+    dance = np.array([np.array(x) for x in dance])
 
-    import pdb; pdb.set_trace()
-    label = get_label(name)
-    dance =  dance.type(torch.cuda.FloatTensor)if torch.cuda.is_available() else  dance.type(torch.FloatTensor)
+    label = torch.LongTensor([extract_label(name)])
+    dance = torch.cuda.FloatTensor(dance) if torch.cuda.is_available() else torch.FloatTensor(dance)
 
-    logits, _ = classifier(dance)
-    loss = F.cross_entropy(logits, label)
+    logits, _ = classifier(dance.unsqueeze(0))
+
+    loss = F.cross_entropy(logits, torch.LongTensor([label]))
+
     correct = (torch.max(logits, 1)
                  [1].view(label.size()).data == label.data)
 
-    import pdb; pdb.set_trace()
     return loss, correct
 
 

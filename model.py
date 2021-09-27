@@ -43,3 +43,31 @@ class Model(nn.Module):
         outputs = [z.unsqueeze(1) for z in preds]
         outputs = torch.cat(outputs, dim=1)
         return outputs
+
+
+    def predict(self, music, pos):
+
+        b, music_length, _ = music.size()
+        generated_frames_num = music_length - 1
+
+        hidden, dec_output, out_seq = self.initialise_decoder(1)
+        a, c = hidden
+
+        enc_outputs, *_ = self.encoder(music, pos)
+
+        preds = []
+        for i in range(1):
+            dec_input = dec_output
+            dec_output, a, c = self.decoder(dec_input, a, c)
+            dec_output = torch.cat([dec_output, enc_outputs[:, i]], 1)
+            dec_output = self.linear(dec_output)
+            preds.append(dec_output[0])
+
+        for i in range(generated_frames_num):
+            dec_input = dec_output
+            dec_output, a, c = self.decoder(dec_input, a, c)
+            dec_output = torch.cat([dec_output, enc_outputs[:, i + 1]], 1)
+            dec_output = self.linear(dec_output)
+            preds.append(dec_output[0])
+
+        return preds

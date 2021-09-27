@@ -62,6 +62,8 @@ def train(train_data, dev_data, classifier, device, args):
 
             dance =  dance.type(torch.cuda.FloatTensor)if torch.cuda.is_available() else  dance.type(torch.FloatTensor)
             optimizer.zero_grad()
+
+            import pdb; pdb.set_trace()
             logits, _ = classifier(dance)
             loss = F.cross_entropy(logits, label)
             loss.backward()

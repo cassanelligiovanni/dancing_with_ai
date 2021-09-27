@@ -3,8 +3,6 @@ import subprocess
 import sys
 from absl import app
 from absl import flags
-from utils.extract_audio import *
-import librosa
 from utils.utils import *
 import math
 import numpy as np

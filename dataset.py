@@ -37,7 +37,7 @@ def prepare_dataloader(music_data, dance_data, batch_size=32):
 def load_data(data_dir):
    music_data, dance_data = [], []
    fnames = os.listdir(data_dir)
-   fnames = fnames[:10]  # For debug
+   # fnames = fnames[:10]  # For debug
 
    for i, fname in enumerate(fnames):
       path = os.path.join(data_dir, fname)

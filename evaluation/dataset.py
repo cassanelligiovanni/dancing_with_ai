@@ -47,7 +47,7 @@ def load_data(data_dir, interval):
     dance_data, labels = [], []
     fnames = sorted(os.listdir(data_dir))
 
-    # fnames = fnames[:60]  # For debug
+    # fnames = fnames[:1000]  # For debug
 
     for fname in fnames:
         if fname != ".DS_Store":

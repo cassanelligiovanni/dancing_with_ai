@@ -31,8 +31,8 @@ def get_sinusoid_encoding_table(n_position, d_hid, padding_idx=None):
 
 class Classifier(nn.Module):
     def __init__(self,
-                 max_seq_len=900, input_size=51, emb_dim=200,
-                 num_classes=10, hidden_size=200, dropout=0.1):
+                 max_seq_len=900, input_size=51, emb_dim=300,
+                 num_classes=10, hidden_size=1024, dropout=0.2):
         super(Classifier, self).__init__()
 
         self.hidden_size = hidden_size

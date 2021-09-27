@@ -54,7 +54,6 @@ def main(_):
         concat = np.concatenate((env[:,:l], mfcc[:, :l], mfcc_delta[:, :l], Qchroma[:, :l], onset[None, :l], beat[:, :l], tempogram[:, :l]))
         concat = concat.transpose()
 
-        import pdb; pdb.set_trace()
         save_obj(concat, output_dir+"/",  this_audio_name)
 
         sys.stderr.write('\rextracting %d / %d' % (i + 1, len(audios)))
@@ -108,7 +107,7 @@ def calculateBeat(onset, sample_rate):
     onset_tempo, onset_beats = librosa.beat.beat_track(onset_envelope=onset, sr=sample_rate,  hop_length=HOP_LENGTH)
     beat = np.zeros(len(onset))
     for idx in onset_beats:
-        beat[idx] = 1
+        beat[idx:idx+3] = 1
     beat = beat.reshape(1, -1)
 
     return beat
