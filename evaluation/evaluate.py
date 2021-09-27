@@ -20,8 +20,6 @@ def test_log(model, data_dir, device):
 
     test_size = len(paths)
 
-    device = torch.device('cpu')
-    model.to(device)
 
     with torch.no_grad():
 
@@ -34,10 +32,14 @@ def test_log(model, data_dir, device):
                 music = np.array(file["music"])
 
                 music_tensor = torch.FloatTensor(music[None, :, :])
-
                 pos =torch.LongTensor(np.arange(1, 143, 1))
 
-                predicted = model.predict(music_tensor, pos)
+                if torch.cuda.is_available() :
+                    music_tensor = torch.FloatTensor(music[None, :, :]).to(device)
+                    pos =torch.LongTensor(np.arange(1, 143, 1)).to(device)
+                    predicted = model.module.predict(music_tensor, pos)
+                else :
+                    predicted = model.predict(music_tensor, pos)
 
                 loss, correct = get_accuracy(predicted, name)
 
