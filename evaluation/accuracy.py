@@ -54,7 +54,7 @@ def get_accuracy(dance, name):
     classifier.eval()
 
     import pdb; pdb.set_trace()
-    dance = np.array([np.array(x) for x in dance])
+    dance = np.array([np.array(x.cpu()) for x in dance])
 
     label = torch.cuda.LongTensor([extract_label(name)])if torch.cuda.is_available() else torch.LongTensor([extract_label(name)])
 
