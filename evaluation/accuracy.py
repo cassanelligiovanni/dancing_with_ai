@@ -53,7 +53,7 @@ def get_accuracy(dance, name):
     classifier = torch.load("./evaluation/checkpoints/final", map_location=torch.device('cpu'))
     classifier.eval()
 
-    dance = np.array([np.array(x) for x in dance.detach()])
+    dance = np.array([np.array(x) for x in dance])
 
     label = torch.cuda.LongTensor([extract_label(name)])if torch.cuda.is_available() else torch.LongTensor([extract_label(name)])
 
