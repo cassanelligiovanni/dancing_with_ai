@@ -49,7 +49,7 @@ def test_log(model, data_dir, device):
                 kinetic_beats = calculate_rom(predicted)
                 music_beats = np.nonzero(music[:, 54])
 
-                beat_coverage += len(kinetic_beats)/len(music_beats)
+                beat_coverage += len(kinetic_beats)/len(music_beats[0])
 
 
     wandb.log({"test ACC(%)": (corrects*100)/test_size, "test Beat Coverage(%)": (beat_coverage*100)/test_size})

@@ -36,7 +36,7 @@ def main(_):
 
     D_POSE_VEC = 51
 
-    D_MODEL = 300
+    D_MODEL = 240
     N_LAYERS = 2
     N_HEAD = 8
     D_K, D_V = 64, 64
@@ -46,8 +46,7 @@ def main(_):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     encoder = Encoder(max_seq_len=142,
-                      input_size=INPUT_SIZE,
-                      d_word_vec=D_MODEL,
+                      music_size=INPUT_SIZE,
                       n_layers=N_LAYERS,
                       n_head=N_HEAD,
                       d_k=D_K,
@@ -56,10 +55,9 @@ def main(_):
                       d_inner=D_INNER,
                       dropout=DROPOUT)
 
-    decoder = Decoder(input_size=D_POSE_VEC,
-                      d_word_vec=D_POSE_VEC,
+    decoder = Decoder(motion_size=D_POSE_VEC,
+                      d_emb=D_POSE_VEC,
                       hidden_size=D_INNER,
-                      encoder_d_model=D_MODEL,
                       dropout=DROPOUT)
 
 
@@ -68,7 +66,7 @@ def main(_):
                   lambda_v=0.01,
                   device=device)
 
-    pretrained_dict = torch.load(model_parameters, map_location='cpu')['model']
+    pretrained_dict = torch.load(model_parameters, map_location='cpu')
     # pretrained_dict = torch.load(model_parameters, map_location='cpu')['twenty_step_model']
     pretrained_dict = {key.replace("module.", ""): value for key, value in pretrained_dict.items()}
 
@@ -94,11 +92,10 @@ def main(_):
           tgt_seq_len = 1
           generated_frames_num = music_length - tgt_seq_len
 
-          hidden, dec_output, out_seq = model.init_decoder_hidden(b)
+          hidden, dec_output, out_seq = model.initialise_decoder(b)
           a, c = hidden
 
-          enc_mask = get_subsequent_mask(music_tensor, 142)
-          enc_outputs, *_ = model.encoder(music_tensor, pos, enc_mask)
+          enc_outputs, *_ = model.encoder(music_tensor, pos)
 
           preds = []
           for i in range(tgt_seq_len):
