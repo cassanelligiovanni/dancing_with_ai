@@ -50,7 +50,7 @@ def get_accuracy(dance, name):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    classifier = torch.load("./evaluation/checkpoints/final", map_location=torch.device('cpu'))
+    classifier = torch.load("./evaluation/checkpoints/final", map_location=device)
     classifier.eval()
     classifier.to(device)
 
