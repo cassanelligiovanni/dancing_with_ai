@@ -54,7 +54,6 @@ def get_accuracy(dance, name):
     classifier.eval()
     classifier.to(device)
 
-    import pdb; pdb.set_trace()
 
     dance = np.array([np.array(x.cpu()) for x in dance])
 

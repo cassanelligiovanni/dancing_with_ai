@@ -45,7 +45,7 @@ def test_log(model, data_dir, device):
 
                 corrects += correct
 
-                predicted = np.array([np.array(x) for x in predicted])
+                predicted = np.array([np.array(x.cpu()) for x in predicted])
                 kinetic_beats = calculate_rom(predicted)
                 music_beats = np.nonzero(music[:, 54])
 
