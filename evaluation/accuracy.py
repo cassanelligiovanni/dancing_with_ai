@@ -64,7 +64,7 @@ def get_accuracy(dance, name):
 
     logits, _ = classifier(dance.unsqueeze(0).to(device))
 
-    loss = F.cross_entropy(logits, torch.LongTensor([label]))
+    loss = F.cross_entropy(logits, torch.LongTensor([label]).to(device))
 
     correct = (torch.max(logits, 1)
                  [1].view(label.size()).data == label.data)
