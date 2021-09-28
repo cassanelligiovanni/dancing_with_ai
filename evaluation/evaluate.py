@@ -20,6 +20,7 @@ def test_log(model, data_dir, device):
 
     test_size = len(paths)
 
+
     with torch.no_grad():
 
         for path in paths:

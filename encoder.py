@@ -41,17 +41,14 @@ class Encoder(nn.Module):
 
         self.transformerLayer = nn.TransformerEncoderLayer(d_model=d_model, nhead=n_head, dim_feedforward=d_inner, batch_first=True)
         self.transformer = nn.TransformerEncoder(self.transformerLayer, num_layers=n_layers)
-        self.layer_stack = nn.ModuleList([
-                    EncoderLayer(d_model, d_inner, n_head, d_k, d_v, dropout=dropout)
-                    for _ in range(n_layers)])
+
 
     def forward(self, src_seq, src_pos):
 
         enc_output = self.src_emb(src_seq)
         enc_output += self.position_enc(src_pos)
-        for enc_layer in self.layer_stack:
-            enc_output  = enc_layer(enc_output)
-        # enc_output = self.transformer(enc_output)
+
+        enc_output = self.transformer(enc_output)
 
         return enc_output,
 
