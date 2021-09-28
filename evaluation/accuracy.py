@@ -52,15 +52,17 @@ def get_accuracy(dance, name):
 
     classifier = torch.load("./evaluation/checkpoints/final", map_location=torch.device('cpu'))
     classifier.eval()
+    classifier.to(device)
 
     import pdb; pdb.set_trace()
+
     dance = np.array([np.array(x.cpu()) for x in dance])
 
     label = torch.cuda.LongTensor([extract_label(name)])if torch.cuda.is_available() else torch.LongTensor([extract_label(name)])
 
     dance = torch.cuda.FloatTensor(dance) if torch.cuda.is_available() else torch.FloatTensor(dance)
 
-    logits, _ = classifier(dance.unsqueeze(0))
+    logits, _ = classifier(dance.unsqueeze(0).to(device))
 
     loss = F.cross_entropy(logits, torch.LongTensor([label]))
 
