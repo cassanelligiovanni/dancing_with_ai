@@ -79,7 +79,6 @@ def test_log(model, data_dir, device):
                 kinetic_beats = calculate_rom(interpolated[20:, :])
                 music_beats = np.nonzero(music[:, 54])
 
-                import pdb; pdb.set_trace()
                 beat_coverage += len(kinetic_beats)/len(music_beats[0])
 
 
