@@ -20,19 +20,20 @@ def interpolate60(preds):
 
     return interpolated.reshape(interpolated.shape[0], 51)
 
-# def calculate_kinetic_beats(motion):
+def calculate_kinetic_beats(motion):
 
-#     # Calculate velocity.
-#     velocity = np.zeros_like(joints, dtype=np.float32)
-#     velocity[1:] = joints[1:] - joints[:-1]
-#     velocity_norms = np.linalg.norm(velocity, axis=2)
-#     envelope = np.sum(velocity_norms, axis=1)  # (seq_len,)
+    # Calculate velocity.
+    velocity = np.zeros_like(joints, dtype=np.float32)
+    velocity[1:] = joints[1:] - joints[:-1]
+    velocity_norms = np.linalg.norm(velocity, axis=2)
+    envelope = np.sum(velocity_norms, axis=1)  # (seq_len,)
 
-#     # Find local minima in velocity -- beats
-#     peak_idxs = scisignal.argrelextrema(envelope, np.less, axis=0, order=10) # 10 for 60FPS
-#     peak_onehot = np.zeros_like(envelope, dtype=bool)
-#     peak_onehot[peak_idxs] = 1
+    # Find local minima in velocity -- beats
+    peak_idxs = scisignal.argrelextrema(envelope, np.less, axis=0, order=10) # 10 for 60FPS
+    peak_onehot = np.zeros_like(envelope, dtype=bool)
+    peak_onehot[peak_idxs] = 1
 
+    return np.nonzero(peak_onehot)
 
 def test_log(model, data_dir, device):
 
