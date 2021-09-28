@@ -1,0 +1,41 @@
+{
+    "os": "macOS-11.5.2-arm64-arm-64bit",
+    "python": "3.8.12",
+    "heartbeatAt": "2021-09-28T08:30:00.967813",
+    "startedAt": "2021-09-28T08:30:00.662107",
+    "docker": null,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": [
+        "--data_dir",
+        "../small_dataset/",
+        "--d_model",
+        "240",
+        "--n_layers",
+        "2",
+        "--n_heads",
+        "8",
+        "--inner_d",
+        "1024",
+        "--learning_rate",
+        "0.0001",
+        "--lambda_v",
+        "0.01",
+        "--dropout",
+        "0.1",
+        "--max_epochs",
+        "4000"
+    ],
+    "state": "running",
+    "program": "train.py",
+    "codePath": "train.py",
+    "git": {
+        "remote": "https://github.com/cassanelligiovanni/dance_revolution.git",
+        "commit": "26c10c9ba58627ef991792e123a9ca1996c31802"
+    },
+    "email": null,
+    "root": "/Users/giovanni/Dissertation/dance_revolution",
+    "host": "Giovannis-Air.Home",
+    "username": "giovanni",
+    "executable": "/opt/homebrew/Caskroom/miniforge/base/envs/dance_revolution/bin/python"
+}
