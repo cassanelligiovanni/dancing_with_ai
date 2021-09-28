@@ -5,6 +5,22 @@ import json
 import numpy as np
 from evaluation.accuracy import *
 from evaluation.kinetic import *
+from interpolate_to_60fps import *
+
+def interpolate60(preds):
+
+    final = preds
+    final = final.reshape(final.shape[0], 51)
+    root = final[:,3*11:3*12]
+    final = final + np.tile(root,(1,17))
+    final[:,3*11:3*12] = root
+    final = final.reshape(final.shape[0], 17, 3)
+
+    interpolated = np.array(interpolate(final))
+
+    return interpolated.reshape(interpolated.shape[0], 51)
+
+
 
 def test_log(model, data_dir, device):
 
@@ -46,7 +62,9 @@ def test_log(model, data_dir, device):
                 corrects += correct
 
                 predicted = np.array([np.array(x.cpu()) for x in predicted])
-                                      kinetic_beats = calculate_rom(predicted[20:, :])
+                interpolated = interpolate60(predicted)
+
+                kinetic_beats = calculate_rom(interpolated[20:, :])
                 music_beats = np.nonzero(music[:, 54])
 
                 beat_coverage += len(kinetic_beats)/len(music_beats[0])
