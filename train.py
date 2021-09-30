@@ -103,7 +103,7 @@ def train(maxEpochs, train_loader,  optimizer, criterion, scheduler, device, enc
 
         train_log(current_loss, steps, epoch)
 
-        if(epoch == 1) :
+        if(epoch%500 == 0) :
             torch.save(model.state_dict(), wandb.run.name +".h5")
             wandb.save(wandb.run.name +".h5")
 
