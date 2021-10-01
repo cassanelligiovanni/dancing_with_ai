@@ -74,7 +74,7 @@ def main(_):
                       dropout=DROPOUT)
 
     decoder = Decoder(motion_size=DANCE_SIZE,
-                      d_emb=DANCE_SIZE,
+                      d_emb=d_model,
                       hidden_size=inner_d,
                       dropout=DROPOUT)
 

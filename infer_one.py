@@ -57,7 +57,7 @@ def main(_):
 
     decoder = Decoder(motion_size=D_POSE_VEC,
                       hidden_size=D_INNER,
-                      d_emb=51,
+                      d_emb=240,
                       dropout=DROPOUT)
 
 
