@@ -51,7 +51,7 @@ random.seed(seed)
 WANDB_API_KEY ="f29aca38281e9a7657e6661c5684aa35fecf37ce"
 
 
-def train(maxEpochs, train_loader,  optimizer, criterion, device, encoder, decoder, model, data_dir):
+def train(maxEpochs, train_loader,  optimizer, criterion, scheduler, device, encoder, decoder, model, data_dir):
 
     steps = 0
     for epoch in range(1, maxEpochs+1):
@@ -175,7 +175,7 @@ def main(_):
 
     model = nn.DataParallel(model).to(device) if torch.cuda.is_available() else model.to(device)
 
-    train(config.maxEpochs, train_loader, optimizer, criterion,  device, encoder, decoder, model, config.data_dir)
+    train(config.maxEpochs, train_loader, optimizer, criterion,  scheduler, device, encoder, decoder, model, config.data_dir)
 
 
 if __name__ == '__main__':
