@@ -151,7 +151,7 @@ def main(_):
                       dropout=config.DROPOUT)
 
     decoder = Decoder(motion_size=config.DANCE_SIZE,
-                      d_emb=config.DANCE_SIZE,
+                      d_emb=config.d_model,
                       hidden_size=config.inner_d,
                       dropout=config.DROPOUT)
 
