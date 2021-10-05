@@ -56,7 +56,20 @@ def train(maxEpochs, train_loader,  optimizer, criterion, scheduler, device, enc
     steps = 0
     for epoch in range(1, maxEpochs+1):
 
+<<<<<<< HEAD
         sys.stderr.write('\rEpoch : %d / %d' % (epoch , maxEpochs))
+=======
+    encoder = Encoder(max_seq_len=426,
+                      input_size=INPUT_SIZE,
+                      d_word_vec=D_MODEL,
+                      n_layers=N_LAYERS,
+                      n_head=N_HEAD,
+                      d_k=D_K,
+                      d_v=D_V,
+                      d_model=D_MODEL,
+                      d_inner=D_INNER,
+                      dropout=DROPOUT)
+>>>>>>> origin/main
 
         calculate_loss = False
         current_loss = 0
@@ -67,11 +80,17 @@ def train(maxEpochs, train_loader,  optimizer, criterion, scheduler, device, enc
 
             steps += len(batch[0])
 
+<<<<<<< HEAD
             music, pos, dance = map(lambda x: x.to(device), batch)
             target = dance[:, 1:]
             music = music[:, :-1]
             pos = pos[:, :-1]
             dance = dance[:, :-1]
+=======
+    learningRate = 0.0001
+    maxEpochs = 3500
+    batch_size = 32
+>>>>>>> origin/main
 
             #Initialise
             if torch.cuda.is_available() :
@@ -79,7 +98,11 @@ def train(maxEpochs, train_loader,  optimizer, criterion, scheduler, device, enc
             else :
                 hidden, initial_frame, initial_seq = model.initialise_decoder(target.size(0))
 
+<<<<<<< HEAD
             optimizer.zero_grad()
+=======
+    train_dir = "../gMH/train"
+>>>>>>> origin/main
 
             # Forward
             output = model(music, pos, dance, hidden, initial_frame, initial_seq, epoch)
@@ -156,12 +179,20 @@ def main(_):
                       dropout=config.DROPOUT)
 
 
+<<<<<<< HEAD
     model = Model(encoder, decoder,
                   condition_step=10,
                   lambda_v=config.lambda_v,
                   device=device)
 
     wandb.watch(model, log="all")
+=======
+        if epoch == 100:
+            scheduler.step()
+
+        if epoch == 200:
+            scheduler.step()
+>>>>>>> origin/main
 
     music_train_data, dance_train_data = load_data(train_dir)
     train_loader = prepare_dataloader(music_train_data, dance_train_data, config.batch_size)
@@ -182,3 +213,9 @@ if __name__ == '__main__':
 
     app.run(main)
 
+<<<<<<< HEAD
+=======
+        if (epoch%100 == 0) :
+            torch.save({"model": model.state_dict(), "loss" : current_loss}, \
+                       f'../gMH/models/epoch_{epoch}_model_parameters.pth')
+>>>>>>> origin/main

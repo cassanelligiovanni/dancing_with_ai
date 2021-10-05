@@ -15,13 +15,21 @@ from torch.nn.utils.rnn import pack_sequence
 from absl import app
 from absl import flags
 
+<<<<<<< HEAD
 from interpolate_to_60fps import *
+=======
+>>>>>>> origin/main
 from utils.utils import *
 from model import *
 from dataset import *
 
+<<<<<<< HEAD
 # np.random.seed(0)
 # torch.manual_seed(0)
+=======
+np.random.seed(0)
+torch.manual_seed(0)
+>>>>>>> origin/main
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("motion", "/temp-motion", "")
@@ -68,6 +76,7 @@ def main(_):
 
     pretrained_dict = torch.load(model_parameters, map_location='cpu')
     # pretrained_dict = torch.load(model_parameters, map_location='cpu')['twenty_step_model']
+
     pretrained_dict = {key.replace("module.", ""): value for key, value in pretrained_dict.items()}
 
     model.load_state_dict(pretrained_dict)
