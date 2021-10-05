@@ -18,58 +18,76 @@ from absl import flags
 from utils.utils import *
 from model import *
 from dataset import *
+from interpolate_to_60fps import *
 
 np.random.seed(0)
 torch.manual_seed(0)
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string("test_dir", "/temp-motion", "")
 flags.DEFINE_string("model", "/temp-motion", "")
 
+FLAGS = flags.FLAGS
+flags.DEFINE_string('data_dir',"./temp", "path to 3d keypoints + extension")
+flags.DEFINE_string('d_model',"240", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('n_layers',"2", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('n_heads',"8", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('inner_d',"1024", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('learning_rate',"0.0001", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('lambda_v',"0.01", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('dropout',"0.1", "path to normalised 3d keypoints + extension")
+flags.DEFINE_string('max_epochs',"5000", "path to normalised 3d keypoints + extension")
+
+
 def main(_):
-    print(FLAGS.test_dir)
-    test_dir = FLAGS.test_dir
+
+    data_dir = FLAGS.data_dir
+    test_dir = os.path.join(data_dir, "dataset/test/")
+    predicted_dir = os.path.join(data_dir, "dataset/predicted/")
     model_parameters =FLAGS.model
 
-
-    INPUT_SIZE = 439
-
-    D_POSE_VEC = 51
-
-    D_MODEL = 200
-    N_LAYERS = 1
-    N_HEAD = 8
+    # Model Parameters
+    d_model = int(FLAGS.d_model)
+    n_layers = int(FLAGS.n_layers)
+    n_heads = int(FLAGS.n_heads)
+    inner_d = int(FLAGS.inner_d)
+    MUSIC_SIZE = 439
+    DANCE_SIZE = 51
     D_K, D_V = 64, 64
-    D_INNER = 1024
-    DROPOUT = 0.1
+
+    # Training  Hyper-parameters
+    learningRate = float(FLAGS.learning_rate)
+    lambda_v = float(FLAGS.lambda_v)
+    maxEpochs = int(FLAGS.max_epochs)
+    batch_size = 16
+    DROPOUT = float(FLAGS.dropout)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    encoder = Encoder(max_seq_len=2878,
-                      input_size=INPUT_SIZE,
-                      d_word_vec=D_MODEL,
-                      n_layers=N_LAYERS,
-                      n_head=N_HEAD,
+    encoder = Encoder(max_seq_len=142,
+                      music_size=MUSIC_SIZE,
+                      n_layers=n_layers,
+                      n_head=n_heads,
                       d_k=D_K,
                       d_v=D_V,
-                      d_model=D_MODEL,
-                      d_inner=D_INNER,
+                      d_model=d_model,
+                      d_inner=inner_d,
                       dropout=DROPOUT)
 
-    decoder = Decoder(input_size=D_POSE_VEC,
-                      d_word_vec=D_POSE_VEC,
-                      hidden_size=D_INNER,
-                      encoder_d_model=D_MODEL,
+    decoder = Decoder(motion_size=DANCE_SIZE,
+                      d_emb=d_model,
+                      hidden_size=inner_d,
                       dropout=DROPOUT)
 
 
     model = Model(encoder, decoder,
                   condition_step=10,
-                  sliding_windown_size=426,
-                  lambda_v=0.01,
+                  lambda_v=lambda_v,
                   device=device)
 
-    pretrained_dict = torch.load(model_parameters, map_location='cpu')['model']
+
+
+
+    pretrained_dict = torch.load(model_parameters, map_location='cpu')
     pretrained_dict = {key.replace("module.", ""): value for key, value in pretrained_dict.items()}
 
     model.load_state_dict(pretrained_dict)
@@ -90,18 +108,17 @@ def main(_):
              # music= np.load(audio_dir+ "/" + audio_name+".pkl", allow_pickle=True)
              music_tensor = torch.FloatTensor(music[None, :, :])
 
-             pos =torch.LongTensor(np.arange(1, 427, 1))
+             pos =torch.LongTensor(np.arange(1, 143, 1))
 
              b, music_length, _ = music_tensor.size()
              # bsz, tgt_seq_len, dim = tgt_seq.size()
              tgt_seq_len = 1
              generated_frames_num = music_length - tgt_seq_len
 
-             hidden, dec_output, out_seq = model.init_decoder_hidden(b)
+             hidden, dec_output, out_seq = model.initialise_decoder(b)
              a, c = hidden
 
-             enc_mask = get_subsequent_mask(music_tensor, 426)
-             enc_outputs, *_ = model.encoder(music_tensor, pos, enc_mask)
+             enc_outputs, *_ = model.encoder(music_tensor, pos)
 
              preds = []
              for i in range(tgt_seq_len):
@@ -119,7 +136,6 @@ def main(_):
                  dec_output = model.linear(dec_output)
                  preds.append(dec_output)
 
-
           final = np.array([np.array(x) for x in  preds])
           final = final.reshape(final.shape[0], 51)
           root = final[:,3*11:3*12]
@@ -127,7 +143,9 @@ def main(_):
           final[:,3*11:3*12] = root
           final = final.reshape(final.shape[0], 17, 3)
 
-          save_obj(final, "../data/dataset/predicted/",name )
+          interpolated = np.array(interpolate(final))
+
+          save_obj(interpolated, predicted_dir, name)
 
 if __name__ == '__main__':
   app.run(main)

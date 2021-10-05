@@ -15,12 +15,21 @@ from torch.nn.utils.rnn import pack_sequence
 from absl import app
 from absl import flags
 
+<<<<<<< HEAD
+from interpolate_to_60fps import *
+=======
+>>>>>>> origin/main
 from utils.utils import *
 from model import *
 from dataset import *
 
+<<<<<<< HEAD
+# np.random.seed(0)
+# torch.manual_seed(0)
+=======
 np.random.seed(0)
 torch.manual_seed(0)
+>>>>>>> origin/main
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("motion", "/temp-motion", "")
@@ -35,8 +44,8 @@ def main(_):
 
     D_POSE_VEC = 51
 
-    D_MODEL = 200
-    N_LAYERS = 1
+    D_MODEL = 240
+    N_LAYERS = 2
     N_HEAD = 8
     D_K, D_V = 64, 64
     D_INNER = 1024
@@ -44,9 +53,8 @@ def main(_):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    encoder = Encoder(max_seq_len=2878,
-                      input_size=INPUT_SIZE,
-                      d_word_vec=D_MODEL,
+    encoder = Encoder(max_seq_len=142,
+                      music_size=INPUT_SIZE,
                       n_layers=N_LAYERS,
                       n_head=N_HEAD,
                       d_k=D_K,
@@ -55,20 +63,20 @@ def main(_):
                       d_inner=D_INNER,
                       dropout=DROPOUT)
 
-    decoder = Decoder(input_size=D_POSE_VEC,
-                      d_word_vec=D_POSE_VEC,
+    decoder = Decoder(motion_size=D_POSE_VEC,
                       hidden_size=D_INNER,
-                      encoder_d_model=D_MODEL,
+                      d_emb=240,
                       dropout=DROPOUT)
 
 
     model = Model(encoder, decoder,
-                  condition_step=30,
-                  sliding_windown_size=426,
+                  condition_step=10,
                   lambda_v=0.01,
                   device=device)
 
-    pretrained_dict = torch.load(model_parameters, map_location='cpu')['model']
+    pretrained_dict = torch.load(model_parameters, map_location='cpu')
+    # pretrained_dict = torch.load(model_parameters, map_location='cpu')['twenty_step_model']
+
     pretrained_dict = {key.replace("module.", ""): value for key, value in pretrained_dict.items()}
 
     model.load_state_dict(pretrained_dict)
@@ -86,18 +94,17 @@ def main(_):
           # music= np.load(audio_dir+ "/" + audio_name+".pkl", allow_pickle=True)
           music_tensor = torch.FloatTensor(music[None, :, :])
 
-          pos =torch.LongTensor(np.arange(1, 427, 1))
+          pos =torch.LongTensor(np.arange(1, 143, 1))
 
           b, music_length, _ = music_tensor.size()
           # bsz, tgt_seq_len, dim = tgt_seq.size()
           tgt_seq_len = 1
           generated_frames_num = music_length - tgt_seq_len
 
-          hidden, dec_output, out_seq = model.init_decoder_hidden(b)
+          hidden, dec_output, out_seq = model.initialise_decoder(b)
           a, c = hidden
 
-          enc_mask = get_subsequent_mask(music_tensor, 426)
-          enc_outputs, *_ = model.encoder(music_tensor, pos, enc_mask)
+          enc_outputs, *_ = model.encoder(music_tensor, pos)
 
           preds = []
           for i in range(tgt_seq_len):
@@ -123,7 +130,9 @@ def main(_):
        final[:,3*11:3*12] = root
        final = final.reshape(final.shape[0], 17, 3)
 
-       save_obj(final, "../gMH/predicted/",name )
+       interpolated = np.array(interpolate(final))
+
+       save_obj(interpolated, "../gMH/predicted/",name )
 
 if __name__ == '__main__':
   app.run(main)

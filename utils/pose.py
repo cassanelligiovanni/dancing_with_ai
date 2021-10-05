@@ -1,11 +1,7 @@
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this open-source project.
-
-""" Define the special poses """
 import numpy as np
 
 
-BOS_POSE = np.array([-3.03933038,197.40993013, -4.02938249, -0.20411807,200.40658281
+INITIAL_POSE = np.array([-3.03933038,197.40993013, -4.02938249, -0.20411807,200.40658281
 , -5.71477181, -5.875523, 200.34909549, -5.77308014, 3.37541695
 ,199.4787599, -12.3712766, -9.70917155,199.43009712,-12.22367906
 , 9.0159848, 184.74933248,-17.24266724,-15.03735,  184.82223941

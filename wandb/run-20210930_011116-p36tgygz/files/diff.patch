@@ -1,0 +1,25 @@
+diff --git a/train.py b/train.py
+index de2627c..2e19143 100644
+--- a/train.py
++++ b/train.py
+@@ -103,9 +103,9 @@ def train(maxEpochs, train_loader,  optimizer, criterion, scheduler, device, enc
+ 
+         train_log(current_loss, steps, epoch)
+ 
+-        if(epoch%500 == 0) :
++        if(epoch == 1) :
+             torch.save(model.state_dict(), wandb.run.name +".h5")
+-            wandb.save('model.h5')
++            wandb.save(wandb.run.name +".h5")
+ 
+         if ((epoch+1)%10 == 0):
+             test_log(model, data_dir, device)
+diff --git a/wandb/latest-run b/wandb/latest-run
+index 98bbd12..c71bd53 120000
+--- a/wandb/latest-run
++++ b/wandb/latest-run
+@@ -1 +1 @@
+-run-20210928_135850-26w8lqs1
+\ No newline at end of file
++run-20210930_011116-p36tgygz
+\ No newline at end of file

@@ -20,6 +20,7 @@ HOP_LENGTH = 800
 WIN_LENGTH = 1024
 
 def main(_):
+
     audio_dir = FLAGS.audio_dir
     output_dir = FLAGS.output_dir
 
@@ -106,7 +107,7 @@ def calculateBeat(onset, sample_rate):
     onset_tempo, onset_beats = librosa.beat.beat_track(onset_envelope=onset, sr=sample_rate,  hop_length=HOP_LENGTH)
     beat = np.zeros(len(onset))
     for idx in onset_beats:
-        beat[idx] = 1
+        beat[idx:idx+3] = 1
     beat = beat.reshape(1, -1)
 
     return beat
