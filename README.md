@@ -1,4 +1,7 @@
 # Dissertation Project : Music To Motion
+
+https://www.youtube.com/watch?v=_GsBnTyi1Q4
+
 This project use the dataset used by the AI choreographer by Google found [here](https://google.github.io/aistplusplus_dataset/index.html)
 but implements the models described by [DanceRevolution](https://github.com/stonyhu/DanceRevolution/)
 
