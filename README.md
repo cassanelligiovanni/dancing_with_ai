@@ -2,9 +2,11 @@
 
 <a href="https://www.youtube.com/watch?v=_GsBnTyi1Q4" title="Music Caster Video Demo">
   <p align="center">
-    <img width="75%" src="https://img.youtube.com/vi/5xwHkLPgvtQ/maxresdefault.jpg" alt="Music Caster Video Demo Thumbnail"/>
+    <img width="75%" src="https://img.youtube.com/vi/_GsBnTyi1Q4/maxresdefault.jpg" alt="Music Caster Video Demo Thumbnail"/>
   </p>
 </a>
+
+https://www.youtube.com/watch?v=_GsBnTyi1Q4
 
 
 
