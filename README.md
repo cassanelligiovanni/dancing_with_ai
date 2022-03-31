@@ -1,6 +1,12 @@
 # Dissertation Project : Music To Motion
 
-https://www.youtube.com/watch?v=_GsBnTyi1Q4
+<a href="https://www.youtube.com/watch?v=_GsBnTyi1Q4" title="Music Caster Video Demo">
+  <p align="center">
+    <img width="75%" src="https://img.youtube.com/vi/5xwHkLPgvtQ/maxresdefault.jpg" alt="Music Caster Video Demo Thumbnail"/>
+  </p>
+</a>
+
+
 
 This project use the dataset used by the AI choreographer by Google found [here](https://google.github.io/aistplusplus_dataset/index.html)
 but implements the models described by [DanceRevolution](https://github.com/stonyhu/DanceRevolution/)
